@@ -1846,3 +1846,100 @@ input {
         grid-template-columns: 1fr;
     }
 }
+/* =========================================================
+   PAGE ACCUEIL - IMAGE DE FOND
+   hero_chargeuses.png
+========================================================= */
+
+/* Arrière-plan de la page d'importation */
+body.page-donnees {
+    background:
+        linear-gradient(
+            rgba(235, 244, 250, 0.58),
+            rgba(235, 244, 250, 0.58)
+        ),
+        url("../images/hero_chargeuses.png");
+
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+}
+
+
+/* Zone principale transparente */
+body.page-donnees main,
+body.page-donnees .main-content,
+body.page-donnees .page-content {
+    background: transparent !important;
+}
+
+
+/* Cartes des deux fichiers */
+body.page-donnees .upload-card {
+    background: rgba(255, 255, 255, 0.90) !important;
+
+    border: 1px solid rgba(210, 222, 231, 0.90);
+
+    border-radius: 14px;
+
+    box-shadow:
+        0 8px 25px rgba(15, 53, 82, 0.08);
+
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+}
+
+
+/* Zone où on sélectionne le fichier */
+body.page-donnees .upload-zone {
+    background: rgba(248, 251, 253, 0.72) !important;
+
+    border: 1px dashed #9ab7ca;
+
+    border-radius: 12px;
+}
+
+
+/* Bloc processus d'analyse */
+body.page-donnees .process-card,
+body.page-donnees .process-section {
+    background: rgba(255, 255, 255, 0.90) !important;
+
+    border: 1px solid rgba(210, 222, 231, 0.90);
+
+    border-radius: 14px;
+
+    box-shadow:
+        0 8px 25px rgba(15, 53, 82, 0.07);
+
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+}
+
+
+/* Le header reste blanc */
+body.page-donnees header,
+body.page-donnees .header,
+body.page-donnees .topbar {
+    background: rgba(255, 255, 255, 0.97) !important;
+}
+
+
+/* Titres */
+body.page-donnees h1,
+body.page-donnees h2,
+body.page-donnees h3 {
+    color: #0e3b5c;
+}
+
+
+/* Mobile */
+@media (max-width: 768px) {
+
+    body.page-donnees {
+        background-position: center;
+        background-attachment: scroll;
+    }
+
+}
