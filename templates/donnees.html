@@ -1,9 +1,7 @@
 <!DOCTYPE html>
-
 <html lang="fr">
 
 <head>
-
     <meta charset="UTF-8">
 
     <meta
@@ -12,59 +10,52 @@
     >
 
     <title>
-        SISE - Nouvelle analyse
+        SISE - Importation des données
     </title>
 
     <link
         rel="stylesheet"
         href="{{ url_for('static', filename='css/style.css') }}"
     >
-
 </head>
 
 
 <body>
 
-
 <header class="top-header">
 
-    <div class="header-left">
+    <div class="header-brand">
 
         <img
             src="{{ url_for('static', filename='images/logo_marsa.png') }}"
-            class="logo"
             alt="Marsa Maroc"
+            class="main-logo"
         >
 
-        <div>
+        <div class="header-separator"></div>
 
-            <div class="brand-title">
+        <div class="sise-brand">
+
+            <strong>
                 SISE
-            </div>
+            </strong>
 
-            <div class="brand-subtitle">
+            <span>
                 Système Intelligent de Surveillance Énergétique
-            </div>
+            </span>
 
         </div>
 
     </div>
 
 
-    <nav class="top-nav">
+    <nav class="main-navigation">
 
         <a
             href="/"
-            class="nav-link"
+            class="navigation-link active"
         >
-            Tableau de bord
-        </a>
-
-        <a
-            href="/donnees"
-            class="nav-link active"
-        >
-            Données
+            Accueil
         </a>
 
     </nav>
@@ -75,7 +66,7 @@
 <main class="page-container narrow">
 
 
-    <section class="page-heading">
+    <section class="dashboard-heading">
 
         <div>
 
@@ -84,8 +75,8 @@
             </h1>
 
             <p>
-                Importez le fichier carburant et le fichier
-                compteur correspondant à la même période.
+                Importez les données mensuelles de consommation de carburant
+                et les relevés des compteurs horaires des chargeuses.
             </p>
 
         </div>
@@ -93,231 +84,378 @@
     </section>
 
 
+    {% with messages = get_flashed_messages() %}
+
+        {% if messages %}
+
+            <div
+                style="
+                    margin-bottom: 18px;
+                    padding: 14px 16px;
+                    background: #fff5f5;
+                    border: 1px solid #f0caca;
+                    border-radius: 8px;
+                    color: #9e3636;
+                    font-size: 11px;
+                "
+            >
+
+                {% for message in messages %}
+
+                    <div>
+                        {{ message }}
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+        {% endif %}
+
+    {% endwith %}
+
+
     <form
-        action="/donnees"
+        action="{{ url_for('analyser') }}"
         method="POST"
         enctype="multipart/form-data"
-        class="upload-form"
+        id="analyseForm"
     >
 
 
-        <div class="upload-grid">
+        <section class="upload-grid">
 
 
-            <div class="upload-card">
+            <!-- FICHIER CARBURANT -->
 
-                <div class="upload-number">
-                    01
-                </div>
+            <article class="upload-card">
+
+                <span class="upload-number">
+                    Fichier 1
+                </span>
 
                 <h2>
-                    Fichier carburant
+                    Consommation de carburant
                 </h2>
 
                 <p>
-                    Fichier Excel contenant les consommations
-                    de carburant des chargeuses.
+                    Sélectionnez le fichier Excel contenant les consommations
+                    mensuelles de carburant des 10 chargeuses.
                 </p>
 
+
                 <label
-                    class="file-zone"
                     for="fichier_carburant"
+                    class="file-zone"
                 >
 
                     <strong>
-                        Sélectionner le fichier
+                        Sélectionner le fichier carburant
                     </strong>
 
-                    <span>
+                    <span
+                        style="
+                            margin-top: 7px;
+                            color: #8196a5;
+                            font-size: 9px;
+                        "
+                    >
                         Format accepté : .xlsx
                     </span>
 
                 </label>
 
+
                 <input
+                    type="file"
                     id="fichier_carburant"
                     name="fichier_carburant"
-                    type="file"
+                    class="file-input"
                     accept=".xlsx"
                     required
-                    class="file-input"
                 >
 
+
                 <div
-                    id="nom-carburant"
+                    id="nomFichierCarburant"
                     class="selected-file"
                 >
                     Aucun fichier sélectionné
                 </div>
 
-            </div>
+            </article>
 
 
-            <div class="upload-card">
 
-                <div class="upload-number">
-                    02
-                </div>
+            <!-- FICHIER COMPTEUR -->
+
+            <article class="upload-card">
+
+                <span class="upload-number">
+                    Fichier 2
+                </span>
 
                 <h2>
-                    Fichier compteur
+                    Compteurs horaires
                 </h2>
 
                 <p>
-                    Fichier Excel contenant les relevés
-                    des compteurs horaires.
+                    Sélectionnez le fichier Excel contenant les relevés des
+                    compteurs horaires pour la même période.
                 </p>
 
+
                 <label
-                    class="file-zone"
                     for="fichier_compteur"
+                    class="file-zone"
                 >
 
                     <strong>
-                        Sélectionner le fichier
+                        Sélectionner le fichier compteur
                     </strong>
 
-                    <span>
+                    <span
+                        style="
+                            margin-top: 7px;
+                            color: #8196a5;
+                            font-size: 9px;
+                        "
+                    >
                         Format accepté : .xlsx
                     </span>
 
                 </label>
 
+
                 <input
+                    type="file"
                     id="fichier_compteur"
                     name="fichier_compteur"
-                    type="file"
+                    class="file-input"
                     accept=".xlsx"
                     required
-                    class="file-input"
                 >
 
+
                 <div
-                    id="nom-compteur"
+                    id="nomFichierCompteur"
                     class="selected-file"
                 >
                     Aucun fichier sélectionné
                 </div>
 
-            </div>
+            </article>
 
 
-        </div>
+        </section>
 
 
-        <div class="process-card">
+        <section class="process-card">
 
-            <h2>
-                Traitement SISE
+            <h2
+                style="
+                    margin-top: 0;
+                    color: #143b58;
+                    font-size: 16px;
+                "
+            >
+                Processus d'analyse
             </h2>
+
+            <p
+                style="
+                    color: #7890a4;
+                    font-size: 10px;
+                    line-height: 1.6;
+                "
+            >
+                Les fichiers importés sont analysés temporairement.
+                Ils ne sont pas ajoutés à l'historique permanent du système.
+            </p>
+
 
             <div class="process-grid">
 
                 <div>
-                    <strong>1</strong>
-                    <span>Lecture</span>
+                    <strong>
+                        1
+                    </strong>
+
+                    <span>
+                        Lecture des fichiers
+                    </span>
                 </div>
 
-                <div>
-                    <strong>2</strong>
-                    <span>Contrôle</span>
-                </div>
 
                 <div>
-                    <strong>3</strong>
-                    <span>Calcul L/h</span>
+                    <strong>
+                        2
+                    </strong>
+
+                    <span>
+                        Vérification de la période
+                    </span>
                 </div>
 
-                <div>
-                    <strong>4</strong>
-                    <span>Historique</span>
-                </div>
 
                 <div>
-                    <strong>5</strong>
-                    <span>ML</span>
+                    <strong>
+                        3
+                    </strong>
+
+                    <span>
+                        Calcul des heures
+                    </span>
                 </div>
 
+
                 <div>
-                    <strong>6</strong>
-                    <span>Diagnostic</span>
+                    <strong>
+                        4
+                    </strong>
+
+                    <span>
+                        Calcul du L/h
+                    </span>
+                </div>
+
+
+                <div>
+                    <strong>
+                        5
+                    </strong>
+
+                    <span>
+                        Analyse SISE
+                    </span>
+                </div>
+
+
+                <div>
+                    <strong>
+                        6
+                    </strong>
+
+                    <span>
+                        Tableau de bord
+                    </span>
                 </div>
 
             </div>
 
-        </div>
 
+            <div class="form-actions">
 
-        <div class="form-actions">
+                <button
+                    type="submit"
+                    class="btn btn-primary"
+                    id="boutonAnalyse"
+                >
+                    Lancer l'analyse
+                </button>
 
-            <a
-                href="/"
-                class="button light"
-            >
-                Annuler
-            </a>
+            </div>
 
-            <button
-                type="submit"
-                class="button primary"
-            >
-                Lancer l'analyse
-            </button>
-
-        </div>
+        </section>
 
 
     </form>
-
 
 </main>
 
 
 <script>
 
-    const carburantInput =
+    const fichierCarburant =
         document.getElementById(
             "fichier_carburant"
         );
 
-    const compteurInput =
+    const fichierCompteur =
         document.getElementById(
             "fichier_compteur"
         );
 
 
-    carburantInput.addEventListener(
+    const nomFichierCarburant =
+        document.getElementById(
+            "nomFichierCarburant"
+        );
+
+    const nomFichierCompteur =
+        document.getElementById(
+            "nomFichierCompteur"
+        );
+
+
+    fichierCarburant.addEventListener(
         "change",
         function () {
 
-            const nom =
-                this.files.length > 0
-                    ? this.files[0].name
-                    : "Aucun fichier sélectionné";
+            if (
+                this.files
+                && this.files.length > 0
+            ) {
 
-            document.getElementById(
-                "nom-carburant"
-            ).textContent = nom;
+                nomFichierCarburant.textContent =
+                    this.files[0].name;
+
+            }
+
+            else {
+
+                nomFichierCarburant.textContent =
+                    "Aucun fichier sélectionné";
+
+            }
 
         }
     );
 
 
-    compteurInput.addEventListener(
+    fichierCompteur.addEventListener(
         "change",
         function () {
 
-            const nom =
-                this.files.length > 0
-                    ? this.files[0].name
-                    : "Aucun fichier sélectionné";
+            if (
+                this.files
+                && this.files.length > 0
+            ) {
 
-            document.getElementById(
-                "nom-compteur"
-            ).textContent = nom;
+                nomFichierCompteur.textContent =
+                    this.files[0].name;
+
+            }
+
+            else {
+
+                nomFichierCompteur.textContent =
+                    "Aucun fichier sélectionné";
+
+            }
 
         }
     );
+
+
+    document
+        .getElementById("analyseForm")
+        .addEventListener(
+            "submit",
+            function () {
+
+                const bouton =
+                    document.getElementById(
+                        "boutonAnalyse"
+                    );
+
+                bouton.disabled = true;
+
+                bouton.textContent =
+                    "Analyse en cours...";
+
+            }
+        );
 
 </script>
 
