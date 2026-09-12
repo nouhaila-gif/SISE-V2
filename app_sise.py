@@ -32,7 +32,9 @@ app.secret_key = os.environ.get(
     "SISE-MARSA-MAROC-2026"
 )
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+BASE_DIR = os.path.dirname(
+    os.path.abspath(__file__)
+)
 
 TEMP_DIR = os.path.join(
     BASE_DIR,
@@ -54,7 +56,9 @@ FICHIER_HISTORIQUE = os.path.join(
     "dataset_historique_final.xlsx"
 )
 
-app.config["MAX_CONTENT_LENGTH"] = 20 * 1024 * 1024
+app.config["MAX_CONTENT_LENGTH"] = (
+    20 * 1024 * 1024
+)
 
 
 # ==========================================================
@@ -73,12 +77,12 @@ MOIS_FR = {
     9: "Septembre",
     10: "Octobre",
     11: "Novembre",
-    12: "Décembre"
+    12: "Décembre",
 }
 
 
 # ==========================================================
-# 3. CONVERSION VALEURS
+# 3. VALEUR SIMPLE
 # ==========================================================
 
 def valeur_simple(valeur):
@@ -86,17 +90,26 @@ def valeur_simple(valeur):
     if valeur is None:
         return None
 
-    if isinstance(valeur, np.integer):
+    if isinstance(
+        valeur,
+        np.integer
+    ):
         return int(valeur)
 
-    if isinstance(valeur, np.floating):
+    if isinstance(
+        valeur,
+        np.floating
+    ):
 
         if np.isnan(valeur):
             return None
 
         return float(valeur)
 
-    if isinstance(valeur, pd.Timestamp):
+    if isinstance(
+        valeur,
+        pd.Timestamp
+    ):
 
         return valeur.strftime(
             "%Y-%m-%d"
@@ -114,7 +127,7 @@ def valeur_simple(valeur):
 
 
 # ==========================================================
-# 4. DATAFRAME -> LISTE
+# 4. DATAFRAME -> RECORDS
 # ==========================================================
 
 def dataframe_vers_records(df):
@@ -127,11 +140,15 @@ def dataframe_vers_records(df):
 
         for colonne in df.columns:
 
-            element[colonne] = valeur_simple(
-                ligne[colonne]
+            element[colonne] = (
+                valeur_simple(
+                    ligne[colonne]
+                )
             )
 
-        records.append(element)
+        records.append(
+            element
+        )
 
     return records
 
@@ -147,7 +164,8 @@ def sauvegarder_resultats_temp(
 
     contenu = {
         "periode": periode,
-        "resultats": dataframe_vers_records(df)
+        "resultats":
+            dataframe_vers_records(df)
     }
 
     with open(
@@ -184,7 +202,9 @@ def charger_resultats_temp():
             encoding="utf-8"
         ) as fichier:
 
-            contenu = json.load(fichier)
+            contenu = json.load(
+                fichier
+            )
 
         records = contenu.get(
             "resultats",
@@ -192,10 +212,12 @@ def charger_resultats_temp():
         )
 
         periode = contenu.get(
-            "periode"
+            "periode",
+            None
         )
 
         if not records:
+
             return None, None
 
         return (
@@ -206,7 +228,7 @@ def charger_resultats_temp():
     except Exception as erreur:
 
         print(
-            "Erreur lecture temporaire :",
+            "Erreur lecture résultats temporaires :",
             repr(erreur)
         )
 
@@ -234,7 +256,7 @@ def supprimer_resultats_temp():
 
 
 # ==========================================================
-# 8. CREER NOM PERIODE
+# 8. NOM DE PERIODE
 # ==========================================================
 
 def creer_periode(
@@ -252,7 +274,9 @@ def creer_periode(
             str(mois)
         )
 
-        return f"{nom_mois} {annee}"
+        return (
+            f"{nom_mois} {annee}"
+        )
 
     except Exception:
 
@@ -260,14 +284,41 @@ def creer_periode(
 
 
 # ==========================================================
-# 9. NOM DE L'ETAT
+# 9. NOM AFFICHABLE DE L'ETAT
 # ==========================================================
 
-def nom_etat(couleur):
+def nom_etat(
+    couleur,
+    type_anomalie=None
+):
 
     couleur = str(
         couleur
     ).upper()
+
+    type_anomalie = str(
+        type_anomalie
+        if type_anomalie is not None
+        else ""
+    ).upper()
+
+    if (
+        type_anomalie
+        == "DONNEE_NON_EXPLOITABLE"
+    ):
+        return "Donnée non exploitable"
+
+    if (
+        type_anomalie
+        == "ANALYSE_INCOMPLETE"
+    ):
+        return "Analyse incomplète"
+
+    if (
+        type_anomalie
+        == "HISTORIQUE_INSUFFISANT"
+    ):
+        return "Historique insuffisant"
 
     if couleur == "ROUGE":
         return "Surconsommation"
@@ -281,14 +332,11 @@ def nom_etat(couleur):
     if couleur == "VERT":
         return "Normal"
 
-    if couleur == "GRIS":
-        return "Historique insuffisant"
-
     return "Non disponible"
 
 
 # ==========================================================
-# 10. PREPARER DASHBOARD
+# 10. PREPARER CHARGEUSES POUR DASHBOARD
 # ==========================================================
 
 def preparer_chargeuses(
@@ -308,12 +356,25 @@ def preparer_chargeuses(
             )
         ).strip()
 
+        # CORRECTION IMPORTANTE
         couleur = str(
             ligne.get(
-                "couleur",
+                "couleur_SISE",
                 "GRIS"
             )
         ).upper()
+
+        type_anomalie = str(
+            ligne.get(
+                "type_anomalie_SISE",
+                ""
+            )
+        )
+
+        etat = nom_etat(
+            couleur,
+            type_anomalie
+        )
 
         lh = valeur_simple(
             ligne.get(
@@ -325,26 +386,41 @@ def preparer_chargeuses(
         reference = valeur_simple(
             ligne.get(
                 "lh_mediane_historique",
-                ligne.get(
-                    "reference_historique",
-                    None
-                )
+                None
             )
         )
 
         robust_z = valeur_simple(
             ligne.get(
                 "robust_z_lh",
-                ligne.get(
-                    "robust_z",
-                    None
-                )
+                None
             )
         )
 
         vote_total = valeur_simple(
             ligne.get(
                 "vote_total",
+                0
+            )
+        )
+
+        vote_if = valeur_simple(
+            ligne.get(
+                "vote_IF",
+                0
+            )
+        )
+
+        vote_lof = valeur_simple(
+            ligne.get(
+                "vote_LOF",
+                0
+            )
+        )
+
+        vote_ocsvm = valeur_simple(
+            ligne.get(
+                "vote_OCSVM",
                 0
             )
         )
@@ -366,47 +442,134 @@ def preparer_chargeuses(
         fiabilite = str(
             ligne.get(
                 "niveau_fiabilite",
-                ""
+                "NON_EVALUEE"
             )
         )
 
-        etat = nom_etat(
-            couleur
+        confiance_ml = str(
+            ligne.get(
+                "confiance_ML",
+                "NON_EVALUEE"
+            )
         )
 
+        item = {
+
+            "engin":
+                engin,
+
+            "lh":
+                lh,
+
+            "lh_reel":
+                lh,
+
+            "referenceHistorique":
+                reference,
+
+            "reference_historique":
+                reference,
+
+            "couleur":
+                couleur,
+
+            "couleur_SISE":
+                couleur,
+
+            "etat":
+                etat,
+
+            "typeAnomalie":
+                type_anomalie,
+
+            "type_anomalie":
+                type_anomalie,
+
+            "robustZ":
+                robust_z,
+
+            "robust_z":
+                robust_z,
+
+            "voteML":
+                vote_total,
+
+            "vote_total":
+                vote_total,
+
+            "vote_IF":
+                vote_if,
+
+            "vote_LOF":
+                vote_lof,
+
+            "vote_OCSVM":
+                vote_ocsvm,
+
+            "fiabilite":
+                fiabilite,
+
+            "niveau_fiabilite":
+                fiabilite,
+
+            "confiance_ML":
+                confiance_ml,
+
+            "heures":
+                heures,
+
+            "litres":
+                litres,
+
+            "periode":
+                periode
+        }
+
         chargeuses.append(
-            {
-                "engin": engin,
-                "lh": lh,
-                "referenceHistorique": reference,
-                "couleur": couleur,
-                "etat": etat,
-                "robustZ": robust_z,
-                "voteML": vote_total,
-                "fiabilite": fiabilite,
-                "heures": heures,
-                "litres": litres
-            }
+            item
         )
 
         cartes.append(
             {
-                "engin": engin,
-                "couleur": couleur,
-                "periode": periode,
-                "lh": lh,
-                "etat": etat
+                "engin":
+                    engin,
+
+                "couleur":
+                    couleur,
+
+                "couleur_SISE":
+                    couleur,
+
+                "periode":
+                    periode,
+
+                "lh":
+                    lh,
+
+                "lh_reel":
+                    lh,
+
+                "etat":
+                    etat,
+
+                "type_anomalie":
+                    type_anomalie
             }
         )
 
-    return chargeuses, cartes
+    return (
+        chargeuses,
+        cartes
+    )
 
 
 # ==========================================================
 # 11. KPI
 # ==========================================================
 
-def creer_resume(chargeuses):
+def creer_resume(
+    chargeuses
+):
 
     resume = {
         "total": len(chargeuses),
@@ -419,24 +582,31 @@ def creer_resume(chargeuses):
 
     for chargeuse in chargeuses:
 
-        couleur = chargeuse.get(
-            "couleur",
-            "GRIS"
-        )
+        couleur = str(
+            chargeuse.get(
+                "couleur",
+                "GRIS"
+            )
+        ).upper()
 
         if couleur == "ROUGE":
+
             resume["rouge"] += 1
 
         elif couleur == "ORANGE":
+
             resume["orange"] += 1
 
         elif couleur == "JAUNE":
+
             resume["jaune"] += 1
 
         elif couleur == "VERT":
+
             resume["vert"] += 1
 
         else:
+
             resume["gris"] += 1
 
     return resume
@@ -444,10 +614,6 @@ def creer_resume(chargeuses):
 
 # ==========================================================
 # 12. ACCUEIL
-# ==========================================================
-#
-# C'EST TOUJOURS LA PREMIERE PAGE.
-#
 # ==========================================================
 
 @app.route("/")
@@ -459,7 +625,7 @@ def accueil():
 
 
 # ==========================================================
-# 13. PAGE IMPORTATION
+# 13. PAGE DONNEES
 # ==========================================================
 
 @app.route("/donnees")
@@ -480,16 +646,20 @@ def donnees():
 )
 def analyser():
 
-    fichier_carburant = request.files.get(
-        "fichier_carburant"
+    fichier_carburant = (
+        request.files.get(
+            "fichier_carburant"
+        )
     )
 
-    fichier_compteur = request.files.get(
-        "fichier_compteur"
+    fichier_compteur = (
+        request.files.get(
+            "fichier_compteur"
+        )
     )
 
     # ------------------------------------------------------
-    # VERIFIER LES DEUX FICHIERS
+    # VERIFIER LES FICHIERS
     # ------------------------------------------------------
 
     if (
@@ -545,7 +715,7 @@ def analyser():
     try:
 
         # ==================================================
-        # 1. LECTURE DES NOUVEAUX FICHIERS
+        # ETAPE 1 : ANALYSE DES DEUX FICHIERS
         # ==================================================
 
         nouvelles_donnees = (
@@ -558,27 +728,31 @@ def analyser():
         if nouvelles_donnees is None:
 
             raise ValueError(
-                "Aucune donnée extraite."
+                "Aucune donnée n'a été extraite."
             )
 
         if nouvelles_donnees.empty:
 
             raise ValueError(
-                "Aucune donnée exploitable."
+                "Aucune donnée exploitable "
+                "n'a été trouvée."
             )
 
         # ==================================================
-        # 2. MOTEUR SISE
+        # ETAPE 2 : MOTEUR SISE
         # ==================================================
 
-        resultats = analyser_avec_sise(
-            nouvelles_donnees
+        resultats = (
+            analyser_avec_sise(
+                nouvelles_donnees
+            )
         )
 
         if resultats is None:
 
             raise ValueError(
-                "Le moteur SISE n'a retourné aucun résultat."
+                "Le moteur SISE n'a retourné "
+                "aucun résultat."
             )
 
         if not isinstance(
@@ -593,17 +767,43 @@ def analyser():
         if resultats.empty:
 
             raise ValueError(
-                "Aucun résultat SISE."
+                "Le moteur SISE n'a produit "
+                "aucun diagnostic."
             )
 
         # ==================================================
-        # 3. PERIODE
+        # DEBUG UTILE
+        # ==================================================
+
+        print(
+            "Colonnes résultats SISE :",
+            list(resultats.columns)
+        )
+
+        if "couleur_SISE" in resultats.columns:
+
+            print(
+                "Répartition couleurs :"
+            )
+
+            print(
+                resultats[
+                    "couleur_SISE"
+                ].value_counts(
+                    dropna=False
+                )
+            )
+
+        # ==================================================
+        # ETAPE 3 : PERIODE
         # ==================================================
 
         if (
-            "mois" in nouvelles_donnees.columns
+            "mois"
+            in nouvelles_donnees.columns
             and
-            "annee" in nouvelles_donnees.columns
+            "annee"
+            in nouvelles_donnees.columns
         ):
 
             mois = nouvelles_donnees[
@@ -621,10 +821,12 @@ def analyser():
 
         else:
 
-            periode = "Période analysée"
+            periode = (
+                "Période analysée"
+            )
 
         # ==================================================
-        # 4. SAUVEGARDE TEMPORAIRE
+        # ETAPE 4 : STOCKAGE TEMPORAIRE
         # ==================================================
 
         sauvegarder_resultats_temp(
@@ -633,11 +835,13 @@ def analyser():
         )
 
         # ==================================================
-        # 5. DASHBOARD
+        # ETAPE 5 : DASHBOARD
         # ==================================================
 
         return redirect(
-            url_for("dashboard")
+            url_for(
+                "dashboard"
+            )
         )
 
     except Exception as erreur:
@@ -653,7 +857,9 @@ def analyser():
         )
 
         return redirect(
-            url_for("accueil")
+            url_for(
+                "accueil"
+            )
         )
 
 
@@ -668,7 +874,6 @@ def dashboard():
         charger_resultats_temp()
     )
 
-    # Dashboard impossible avant une analyse
     if df is None:
 
         return redirect(
@@ -686,36 +891,60 @@ def dashboard():
         chargeuses
     )
 
+    print(
+        "Résumé dashboard :",
+        resume
+    )
+
     return render_template(
+
         "index.html",
 
-        chargeuses=chargeuses,
+        chargeuses=
+            chargeuses,
 
-        cartes=cartes,
+        cartes=
+            cartes,
 
-        resume=resume,
+        resume=
+            resume,
 
-        total=resume["total"],
-        nb_rouge=resume["rouge"],
-        nb_orange=resume["orange"],
-        nb_jaune=resume["jaune"],
-        nb_vert=resume["vert"],
-        nb_gris=resume["gris"],
+        total=
+            resume["total"],
 
-        mois_importe=True,
+        nb_rouge=
+            resume["rouge"],
 
-        periode_importee=periode
+        nb_orange=
+            resume["orange"],
+
+        nb_jaune=
+            resume["jaune"],
+
+        nb_vert=
+            resume["vert"],
+
+        nb_gris=
+            resume["gris"],
+
+        mois_importe=
+            True,
+
+        periode_importee=
+            periode
     )
 
 
 # ==========================================================
-# 16. DETAIL D'UNE CHARGEUSE
+# 16. DETAIL CHARGEUSE
 # ==========================================================
 
 @app.route(
     "/chargeuse/<engin>"
 )
-def detail_chargeuse(engin):
+def detail_chargeuse(
+    engin
+):
 
     df, periode = (
         charger_resultats_temp()
@@ -751,147 +980,342 @@ def detail_chargeuse(engin):
 
     ligne = selection.iloc[0]
 
+    # ======================================================
+    # CORRECTION DES NOMS DU MOTEUR SISE
+    # ======================================================
+
     couleur = str(
         ligne.get(
-            "couleur",
+            "couleur_SISE",
             "GRIS"
         )
     ).upper()
 
+    type_anomalie = str(
+        ligne.get(
+            "type_anomalie_SISE",
+            "NON_DISPONIBLE"
+        )
+    )
+
+    etat = nom_etat(
+        couleur,
+        type_anomalie
+    )
+
     data = {
 
-        "engin": engin,
+        "engin":
+            str(engin),
 
-        "periode": periode,
+        "periode":
+            periode,
 
-        "couleur": couleur,
+        "couleur":
+            couleur,
 
-        "etat": nom_etat(
-            couleur
-        ),
+        "couleur_SISE":
+            couleur,
 
-        "lh_reel": valeur_simple(
-            ligne.get(
-                "lh_reel",
-                None
-            )
-        ),
+        "etat":
+            etat,
 
-        "reference_historique": valeur_simple(
-            ligne.get(
-                "lh_mediane_historique",
+        "type_anomalie":
+            type_anomalie,
+
+        "type_anomalie_SISE":
+            type_anomalie,
+
+        "lh_reel":
+            valeur_simple(
                 ligne.get(
-                    "reference_historique",
+                    "lh_reel",
                     None
                 )
-            )
-        ),
+            ),
 
-        "heures": valeur_simple(
-            ligne.get(
-                "heures",
-                None
-            )
-        ),
-
-        "litres": valeur_simple(
-            ligne.get(
-                "litres",
-                None
-            )
-        ),
-
-        "type_anomalie": str(
-            ligne.get(
-                "type_anomalie",
-                "NON_DISPONIBLE"
-            )
-        ),
-
-        "ecart_lh_pct": valeur_simple(
-            ligne.get(
-                "ecart_lh_pct",
-                None
-            )
-        ),
-
-        "robust_z": valeur_simple(
-            ligne.get(
-                "robust_z_lh",
+        "reference_historique":
+            valeur_simple(
                 ligne.get(
-                    "robust_z",
+                    "lh_mediane_historique",
                     None
                 )
-            )
-        ),
+            ),
 
-        "ratio_activite": valeur_simple(
-            ligne.get(
-                "ratio_heures_historique",
-                None
-            )
-        ),
-
-        "vote_total": valeur_simple(
-            ligne.get(
-                "vote_total",
-                0
-            )
-        ),
-
-        "vote_IF": valeur_simple(
-            ligne.get(
-                "vote_IF",
-                0
-            )
-        ),
-
-        "vote_LOF": valeur_simple(
-            ligne.get(
-                "vote_LOF",
-                0
-            )
-        ),
-
-        "vote_OCSVM": valeur_simple(
-            ligne.get(
-                "vote_OCSVM",
-                0
-            )
-        ),
-
-        "niveau_fiabilite": str(
-            ligne.get(
-                "niveau_fiabilite",
-                "NON_DISPONIBLE"
-            )
-        ),
-
-        "raison_fiabilite": str(
-            ligne.get(
-                "raison_fiabilite",
-                ""
-            )
-        ),
-
-        "explication": str(
-            ligne.get(
-                "analyse_detaillee_SISE",
+        "lh_mediane_historique":
+            valeur_simple(
                 ligne.get(
-                    "explication_type_anomalie",
+                    "lh_mediane_historique",
+                    None
+                )
+            ),
+
+        "lh_mad_historique":
+            valeur_simple(
+                ligne.get(
+                    "lh_mad_historique",
+                    None
+                )
+            ),
+
+        "heures_mediane_historique":
+            valeur_simple(
+                ligne.get(
+                    "heures_mediane_historique",
+                    None
+                )
+            ),
+
+        "nb_historique_precedent":
+            valeur_simple(
+                ligne.get(
+                    "nb_historique_precedent",
+                    None
+                )
+            ),
+
+        "historique_suffisant":
+            valeur_simple(
+                ligne.get(
+                    "historique_suffisant",
+                    False
+                )
+            ),
+
+        "heures":
+            valeur_simple(
+                ligne.get(
+                    "heures",
+                    None
+                )
+            ),
+
+        "litres":
+            valeur_simple(
+                ligne.get(
+                    "litres",
+                    None
+                )
+            ),
+
+        "compteur_debut":
+            valeur_simple(
+                ligne.get(
+                    "compteur_debut",
+                    None
+                )
+            ),
+
+        "compteur_fin":
+            valeur_simple(
+                ligne.get(
+                    "compteur_fin",
+                    None
+                )
+            ),
+
+        "statut_donnee":
+            str(
+                ligne.get(
+                    "statut_donnee",
                     ""
                 )
-            )
-        ),
+            ),
 
-        "action": str(
-            ligne.get(
-                "action_recommandee",
-                ""
-            )
-        ),
+        "ecart_lh_pct":
+            valeur_simple(
+                ligne.get(
+                    "ecart_lh_pct",
+                    None
+                )
+            ),
 
-        "nouveau_mois": True
+        "robust_z":
+            valeur_simple(
+                ligne.get(
+                    "robust_z_lh",
+                    None
+                )
+            ),
+
+        "robust_z_lh":
+            valeur_simple(
+                ligne.get(
+                    "robust_z_lh",
+                    None
+                )
+            ),
+
+        "ratio_activite":
+            valeur_simple(
+                ligne.get(
+                    "ratio_heures_historique",
+                    None
+                )
+            ),
+
+        "ratio_heures_historique":
+            valeur_simple(
+                ligne.get(
+                    "ratio_heures_historique",
+                    None
+                )
+            ),
+
+        "vote_total":
+            valeur_simple(
+                ligne.get(
+                    "vote_total",
+                    0
+                )
+            ),
+
+        "vote_IF":
+            valeur_simple(
+                ligne.get(
+                    "vote_IF",
+                    0
+                )
+            ),
+
+        "vote_LOF":
+            valeur_simple(
+                ligne.get(
+                    "vote_LOF",
+                    0
+                )
+            ),
+
+        "vote_OCSVM":
+            valeur_simple(
+                ligne.get(
+                    "vote_OCSVM",
+                    0
+                )
+            ),
+
+        "nb_detections_IF":
+            valeur_simple(
+                ligne.get(
+                    "nb_detections_IF",
+                    0
+                )
+            ),
+
+        "nb_detections_LOF":
+            valeur_simple(
+                ligne.get(
+                    "nb_detections_LOF",
+                    0
+                )
+            ),
+
+        "nb_detections_OCSVM":
+            valeur_simple(
+                ligne.get(
+                    "nb_detections_OCSVM",
+                    0
+                )
+            ),
+
+        "confiance_ML":
+            str(
+                ligne.get(
+                    "confiance_ML",
+                    "NON_EVALUEE"
+                )
+            ),
+
+        "niveau_fiabilite":
+            str(
+                ligne.get(
+                    "niveau_fiabilite",
+                    "NON_EVALUEE"
+                )
+            ),
+
+        "raison_fiabilite":
+            str(
+                ligne.get(
+                    "raison_fiabilite",
+                    ""
+                )
+            ),
+
+        "interpretation_consommation":
+            str(
+                ligne.get(
+                    "interpretation_consommation",
+                    ""
+                )
+            ),
+
+        "interpretation_activite":
+            str(
+                ligne.get(
+                    "interpretation_activite",
+                    ""
+                )
+            ),
+
+        "interpretation_ML":
+            str(
+                ligne.get(
+                    "interpretation_ML",
+                    ""
+                )
+            ),
+
+        "conclusion":
+            str(
+                ligne.get(
+                    "conclusion_SISE",
+                    ""
+                )
+            ),
+
+        "conclusion_SISE":
+            str(
+                ligne.get(
+                    "conclusion_SISE",
+                    ""
+                )
+            ),
+
+        "explication":
+            str(
+                ligne.get(
+                    "explication_SISE",
+                    ""
+                )
+            ),
+
+        "explication_SISE":
+            str(
+                ligne.get(
+                    "explication_SISE",
+                    ""
+                )
+            ),
+
+        "action":
+            str(
+                ligne.get(
+                    "action_recommandee",
+                    ""
+                )
+            ),
+
+        "action_recommandee":
+            str(
+                ligne.get(
+                    "action_recommandee",
+                    ""
+                )
+            ),
+
+        "nouveau_mois":
+            True
     }
 
     # ======================================================
@@ -911,35 +1335,60 @@ def detail_chargeuse(engin):
                 sheet_name="Donnees_valides"
             )
 
-            if "engin" in historique.columns:
+            if (
+                "engin"
+                in historique.columns
+            ):
 
                 historique["engin"] = (
                     historique["engin"]
                     .astype(str)
+                    .str.replace(
+                        " ",
+                        "",
+                        regex=False
+                    )
                     .str.strip()
+                    .str.upper()
                 )
 
-                historique_engin = historique[
-                    historique["engin"]
-                    ==
-                    str(engin).strip()
-                ].copy()
+                historique_engin = (
+                    historique[
+                        historique["engin"]
+                        ==
+                        str(engin)
+                        .replace(" ", "")
+                        .strip()
+                        .upper()
+                    ]
+                    .copy()
+                )
 
-                if "date" in historique_engin.columns:
+                if (
+                    "date"
+                    in historique_engin.columns
+                ):
 
-                    historique_engin["date"] = (
-                        pd.to_datetime(
-                            historique_engin["date"],
-                            errors="coerce"
-                        )
+                    historique_engin[
+                        "date"
+                    ] = pd.to_datetime(
+                        historique_engin[
+                            "date"
+                        ],
+                        errors="coerce"
                     )
 
                     historique_engin = (
                         historique_engin
-                        .sort_values("date")
+                        .sort_values(
+                            "date"
+                        )
                     )
 
-                for _, hist in historique_engin.iterrows():
+                for _, hist in (
+                    historique_engin
+                    .iterrows()
+                ):
 
                     date_hist = hist.get(
                         "date",
@@ -963,18 +1412,26 @@ def detail_chargeuse(engin):
                             date_hist
                         )
 
+                    lh_hist = valeur_simple(
+                        hist.get(
+                            "lh_reel",
+                            None
+                        )
+                    )
+
                     history.append(
                         {
-                            "periode": nom_periode,
+                            "periode":
+                                nom_periode,
 
-                            "lh_reel": valeur_simple(
-                                hist.get(
-                                    "lh_reel",
-                                    None
-                                )
-                            ),
+                            "lh_reel":
+                                lh_hist,
 
-                            "nouveau": False
+                            "lh":
+                                lh_hist,
+
+                            "nouveau":
+                                False
                         }
                     )
 
@@ -985,23 +1442,45 @@ def detail_chargeuse(engin):
                 repr(erreur)
             )
 
-    # Nouveau mois uniquement pour l'affichage
+    # ======================================================
+    # AJOUT DU NOUVEAU MOIS AU GRAPHIQUE UNIQUEMENT
+    # ======================================================
+
     history.append(
         {
-            "periode": periode,
+            "periode":
+                periode,
 
-            "lh_reel": data[
-                "lh_reel"
-            ],
+            "lh_reel":
+                data[
+                    "lh_reel"
+                ],
 
-            "nouveau": True
+            "lh":
+                data[
+                    "lh_reel"
+                ],
+
+            "nouveau":
+                True
         }
     )
 
     return render_template(
+
         "detail.html",
-        data=data,
-        history=history
+
+        data=
+            data,
+
+        history=
+            history,
+
+        history_json=
+            json.dumps(
+                history,
+                ensure_ascii=False
+            )
     )
 
 
@@ -1012,7 +1491,9 @@ def detail_chargeuse(engin):
 @app.route(
     "/qr/<engin>.png"
 )
-def qr_chargeuse(engin):
+def qr_chargeuse(
+    engin
+):
 
     adresse = url_for(
         "detail_chargeuse",
@@ -1080,19 +1561,37 @@ def export_csv():
     )
 
     return Response(
+
         "\ufeff" + csv,
 
         mimetype="text/csv",
 
         headers={
             "Content-Disposition":
-            "attachment; filename=resultats_SISE.csv"
+                "attachment; "
+                "filename=resultats_SISE.csv"
         }
     )
 
 
 # ==========================================================
-# 19. NOUVELLE ANALYSE
+# 19. RETIRER ANALYSE
+# ==========================================================
+
+@app.route(
+    "/reinitialiser-analyse"
+)
+def reinitialiser_analyse():
+
+    supprimer_resultats_temp()
+
+    return redirect(
+        url_for("accueil")
+    )
+
+
+# ==========================================================
+# 20. NOUVELLE ANALYSE
 # ==========================================================
 
 @app.route(
@@ -1108,7 +1607,7 @@ def nouvelle_analyse():
 
 
 # ==========================================================
-# 20. LANCEMENT LOCAL
+# 21. LANCEMENT LOCAL
 # ==========================================================
 
 if __name__ == "__main__":
