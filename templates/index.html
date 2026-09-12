@@ -1,137 +1,356 @@
-<!-- ======================================================
-     INDICATEURS PRINCIPAUX
-====================================================== -->
+<!DOCTYPE html>
+<html lang="fr">
 
-<section class="kpi-grid">
+<head>
+    <meta charset="UTF-8">
 
-    <!-- CHARGEUSES SUIVIES -->
-    <div class="kpi-card">
-        <div class="kpi-title">
-            Chargeuses suivies
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>SISE - Tableau de bord</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/style.css') }}"
+    >
+</head>
+
+
+<body>
+
+<main class="dashboard-container">
+
+    <!-- ==================================================
+         TITRE
+    =================================================== -->
+
+    <section class="dashboard-heading">
+
+        <div>
+            <h1>
+                Tableau de bord du parc
+            </h1>
+
+            <p>
+                Surveillance énergétique des chargeuses du Port de Safi.
+            </p>
         </div>
 
-        <div class="kpi-value">
-            {{ total }}
+
+        <div class="dashboard-actions">
+
+            <a
+                href="{{ url_for('export_csv') }}"
+                class="btn-secondary"
+            >
+                Exporter CSV
+            </a>
+
+            <a
+                href="{{ url_for('nouvelle_analyse') }}"
+                class="btn-primary"
+            >
+                Nouvelle analyse
+            </a>
+
         </div>
 
-        <div class="kpi-subtitle">
-            100 % du parc
+    </section>
+
+
+    <!-- ==================================================
+         PERIODE
+    =================================================== -->
+
+    <section class="period-card">
+
+        <div>
+            <span class="period-label">
+                Période actuellement analysée
+            </span>
+
+            <strong>
+                {{ periode_importee }}
+            </strong>
         </div>
 
-        <div class="kpi-progress">
+        <p>
+            Le mois importé est utilisé pour le diagnostic actuel
+            mais n'est pas ajouté à l'historique permanent.
+        </p>
+
+    </section>
+
+
+    <!-- ==================================================
+         INDICATEURS
+    =================================================== -->
+
+    <section class="kpi-grid">
+
+        <!-- CHARGEUSES SUIVIES -->
+
+        <div class="kpi-card">
+
+            <div class="kpi-title">
+                Chargeuses suivies
+            </div>
+
+            <div class="kpi-value">
+                {{ total }}
+            </div>
+
+            <div class="kpi-subtitle">
+                100 % du parc
+            </div>
+
+            <div class="kpi-progress">
+                <div
+                    class="kpi-progress-bar"
+                    style="width: 100%;"
+                ></div>
+            </div>
+
+        </div>
+
+
+        <!-- SURCONSOMMATION -->
+
+        <div class="kpi-card">
+
+            <div class="kpi-title">
+                Surconsommation
+            </div>
+
+            <div class="kpi-value">
+                {{ nb_rouge }}
+            </div>
+
+            <div class="kpi-subtitle">
+                {{ (nb_rouge / total * 100) | round(0) | int if total else 0 }}
+                % du parc
+            </div>
+
+            <div class="kpi-progress">
+                <div
+                    class="kpi-progress-bar"
+                    style="width: {{ (nb_rouge / total * 100) if total else 0 }}%;"
+                ></div>
+            </div>
+
+        </div>
+
+
+        <!-- A SURVEILLER -->
+
+        <div class="kpi-card">
+
+            <div class="kpi-title">
+                À surveiller
+            </div>
+
+            <div class="kpi-value">
+                {{ nb_jaune }}
+            </div>
+
+            <div class="kpi-subtitle">
+                {{ (nb_jaune / total * 100) | round(0) | int if total else 0 }}
+                % du parc
+            </div>
+
+            <div class="kpi-progress">
+                <div
+                    class="kpi-progress-bar"
+                    style="width: {{ (nb_jaune / total * 100) if total else 0 }}%;"
+                ></div>
+            </div>
+
+        </div>
+
+
+        <!-- NORMAL -->
+
+        <div class="kpi-card">
+
+            <div class="kpi-title">
+                Normal
+            </div>
+
+            <div class="kpi-value">
+                {{ nb_vert }}
+            </div>
+
+            <div class="kpi-subtitle">
+                {{ (nb_vert / total * 100) | round(0) | int if total else 0 }}
+                % du parc
+            </div>
+
+            <div class="kpi-progress">
+                <div
+                    class="kpi-progress-bar"
+                    style="width: {{ (nb_vert / total * 100) if total else 0 }}%;"
+                ></div>
+            </div>
+
+        </div>
+
+
+        <!-- HISTORIQUE INSUFFISANT -->
+
+        <div class="kpi-card">
+
+            <div class="kpi-title">
+                Historique insuffisant
+            </div>
+
+            <div class="kpi-value">
+                {{ nb_gris }}
+            </div>
+
+            <div class="kpi-subtitle">
+                {{ (nb_gris / total * 100) | round(0) | int if total else 0 }}
+                % du parc
+            </div>
+
+            <div class="kpi-progress">
+                <div
+                    class="kpi-progress-bar"
+                    style="width: {{ (nb_gris / total * 100) if total else 0 }}%;"
+                ></div>
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- ==================================================
+         ZONE PRINCIPALE
+    =================================================== -->
+
+    <section class="dashboard-main-grid">
+
+
+        <!-- PARC DE CHARGEUSES -->
+
+        <div class="panel">
+
+            <div class="panel-header">
+
+                <div>
+                    <h2>
+                        Parc de chargeuses
+                    </h2>
+
+                    <p>
+                        État actuel selon le diagnostic SISE.
+                    </p>
+                </div>
+
+            </div>
+
+
+            <div class="chargeuse-list">
+
+                {% for chargeuse in chargeuses %}
+
+                <div class="chargeuse-row">
+
+                    <div class="chargeuse-info">
+
+                        <strong>
+                            {{ chargeuse.engin }}
+                        </strong>
+
+                        <span>
+                            {{ periode_importee }}
+                        </span>
+
+                    </div>
+
+
+                    <div class="chargeuse-lh">
+
+                        {% if chargeuse.lh is not none %}
+
+                            {{ chargeuse.lh | round(2) }} L/h
+
+                        {% else %}
+
+                            Non disponible
+
+                        {% endif %}
+
+                    </div>
+
+
+                    <div class="chargeuse-status">
+
+                        {{ chargeuse.etat }}
+
+                    </div>
+
+
+                    <a
+                        href="{{ url_for('detail_chargeuse', engin=chargeuse.engin) }}"
+                        class="detail-link"
+                    >
+                        Voir détails
+                    </a>
+
+                </div>
+
+                {% endfor %}
+
+            </div>
+
+        </div>
+
+
+        <!-- COMPARAISON -->
+
+        <div class="panel">
+
+            <div class="panel-header">
+
+                <div>
+                    <h2>
+                        Comparaison L/h — Tous les engins
+                    </h2>
+
+                    <p>
+                        Consommation du mois :
+                        <strong>
+                            {{ periode_importee }}
+                        </strong>
+                    </p>
+                </div>
+
+            </div>
+
+
             <div
-                class="kpi-progress-bar"
-                style="width: 100%;"
+                id="comparisonChart"
+                class="chart-container"
             ></div>
-        </div>
-    </div>
 
-
-    <!-- SURCONSOMMATION -->
-    <div class="kpi-card">
-        <div class="kpi-title">
-            Surconsommation
         </div>
 
-        <div class="kpi-value">
-            {{ nb_rouge }}
-        </div>
+    </section>
 
-        <div class="kpi-subtitle">
-            {{ (nb_rouge / total * 100) | round(0) | int if total else 0 }}
-            % du parc
-        </div>
-
-        <div class="kpi-progress">
-            <div
-                class="kpi-progress-bar"
-                style="
-                    width:
-                    {{ (nb_rouge / total * 100) if total else 0 }}%;
-                "
-            ></div>
-        </div>
-    </div>
+</main>
 
 
-    <!-- A SURVEILLER -->
-    <div class="kpi-card">
-        <div class="kpi-title">
-            À surveiller
-        </div>
+<script>
+    const chargeusesData = {{ chargeuses | tojson }};
+</script>
 
-        <div class="kpi-value">
-            {{ nb_jaune }}
-        </div>
+<script
+    src="{{ url_for('static', filename='js/dashboard.js') }}"
+></script>
 
-        <div class="kpi-subtitle">
-            {{ (nb_jaune / total * 100) | round(0) | int if total else 0 }}
-            % du parc
-        </div>
+</body>
 
-        <div class="kpi-progress">
-            <div
-                class="kpi-progress-bar"
-                style="
-                    width:
-                    {{ (nb_jaune / total * 100) if total else 0 }}%;
-                "
-            ></div>
-        </div>
-    </div>
-
-
-    <!-- NORMAL -->
-    <div class="kpi-card">
-        <div class="kpi-title">
-            Normal
-        </div>
-
-        <div class="kpi-value">
-            {{ nb_vert }}
-        </div>
-
-        <div class="kpi-subtitle">
-            {{ (nb_vert / total * 100) | round(0) | int if total else 0 }}
-            % du parc
-        </div>
-
-        <div class="kpi-progress">
-            <div
-                class="kpi-progress-bar"
-                style="
-                    width:
-                    {{ (nb_vert / total * 100) if total else 0 }}%;
-                "
-            ></div>
-        </div>
-    </div>
-
-
-    <!-- HISTORIQUE INSUFFISANT -->
-    <div class="kpi-card">
-        <div class="kpi-title">
-            Historique insuffisant
-        </div>
-
-        <div class="kpi-value">
-            {{ nb_gris }}
-        </div>
-
-        <div class="kpi-subtitle">
-            {{ (nb_gris / total * 100) | round(0) | int if total else 0 }}
-            % du parc
-        </div>
-
-        <div class="kpi-progress">
-            <div
-                class="kpi-progress-bar"
-                style="
-                    width:
-                    {{ (nb_gris / total * 100) if total else 0 }}%;
-                "
-            ></div>
-        </div>
-    </div>
-
-</section>
+</html>
