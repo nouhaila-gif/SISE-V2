@@ -1750,3 +1750,157 @@ input {
     }
 
 }
+/* ==========================================================
+   KPI - STYLE SIMPLE ET PROFESSIONNEL
+========================================================== */
+
+.kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 18px;
+    margin: 24px 0 30px 0;
+}
+
+
+/* CARTE */
+
+.kpi-card {
+    background: #ffffff;
+
+    border: 1px solid #dce4ea;
+
+    border-radius: 12px;
+
+    padding: 24px 26px;
+
+    min-height: 175px;
+
+    box-shadow:
+        0 3px 10px rgba(15, 47, 72, 0.04);
+
+    display: flex;
+
+    flex-direction: column;
+
+    justify-content: space-between;
+
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+
+.kpi-card:hover {
+    transform: translateY(-2px);
+
+    box-shadow:
+        0 6px 18px rgba(15, 47, 72, 0.07);
+}
+
+
+/* TITRE */
+
+.kpi-title {
+    font-size: 15px;
+
+    font-weight: 600;
+
+    color: #173b58;
+
+    margin-bottom: 18px;
+
+    line-height: 1.3;
+}
+
+
+/* VALEUR */
+
+.kpi-value {
+    font-size: 42px;
+
+    font-weight: 700;
+
+    color: #0f3552;
+
+    line-height: 1;
+
+    margin-bottom: 10px;
+}
+
+
+/* TEXTE SECONDAIRE */
+
+.kpi-subtitle {
+    font-size: 13px;
+
+    color: #71879a;
+
+    margin-bottom: 20px;
+}
+
+
+/* BARRE */
+
+.kpi-progress {
+    width: 100%;
+
+    height: 6px;
+
+    border-radius: 10px;
+
+    background: #e8edf1;
+
+    overflow: hidden;
+}
+
+
+/* MEME COULEUR POUR TOUTES LES BARRES */
+
+.kpi-progress-bar {
+    height: 100%;
+
+    background: #526f86;
+
+    border-radius: 10px;
+
+    transition: width 0.4s ease;
+}
+
+
+/* ==========================================================
+   RESPONSIVE
+========================================================== */
+
+@media (max-width: 1200px) {
+
+    .kpi-grid {
+        grid-template-columns:
+            repeat(3, 1fr);
+    }
+}
+
+
+@media (max-width: 800px) {
+
+    .kpi-grid {
+        grid-template-columns:
+            repeat(2, 1fr);
+    }
+}
+
+
+@media (max-width: 520px) {
+
+    .kpi-grid {
+        grid-template-columns:
+            1fr;
+    }
+
+    .kpi-card {
+        min-height: 150px;
+    }
+
+    .kpi-value {
+        font-size: 36px;
+    }
+}
