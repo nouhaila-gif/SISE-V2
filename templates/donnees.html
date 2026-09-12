@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+
+<html lang="fr">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        SISE - Nouvelle analyse
+    </title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/style.css') }}"
+    >
+
+</head>
+
+
+<body>
+
+
+<header class="top-header">
+
+    <div class="header-left">
+
+        <img
+            src="{{ url_for('static', filename='images/logo_marsa.png') }}"
+            class="logo"
+            alt="Marsa Maroc"
+        >
+
+        <div>
+
+            <div class="brand-title">
+                SISE
+            </div>
+
+            <div class="brand-subtitle">
+                Système Intelligent de Surveillance Énergétique
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <nav class="top-nav">
+
+        <a
+            href="/"
+            class="nav-link"
+        >
+            Tableau de bord
+        </a>
+
+        <a
+            href="/donnees"
+            class="nav-link active"
+        >
+            Données
+        </a>
+
+    </nav>
+
+</header>
+
+
+<main class="page-container narrow">
+
+
+    <section class="page-heading">
+
+        <div>
+
+            <h1>
+                Nouvelle analyse
+            </h1>
+
+            <p>
+                Importez le fichier carburant et le fichier
+                compteur correspondant à la même période.
+            </p>
+
+        </div>
+
+    </section>
+
+
+    <form
+        action="/donnees"
+        method="POST"
+        enctype="multipart/form-data"
+        class="upload-form"
+    >
+
+
+        <div class="upload-grid">
+
+
+            <div class="upload-card">
+
+                <div class="upload-number">
+                    01
+                </div>
+
+                <h2>
+                    Fichier carburant
+                </h2>
+
+                <p>
+                    Fichier Excel contenant les consommations
+                    de carburant des chargeuses.
+                </p>
+
+                <label
+                    class="file-zone"
+                    for="fichier_carburant"
+                >
+
+                    <strong>
+                        Sélectionner le fichier
+                    </strong>
+
+                    <span>
+                        Format accepté : .xlsx
+                    </span>
+
+                </label>
+
+                <input
+                    id="fichier_carburant"
+                    name="fichier_carburant"
+                    type="file"
+                    accept=".xlsx"
+                    required
+                    class="file-input"
+                >
+
+                <div
+                    id="nom-carburant"
+                    class="selected-file"
+                >
+                    Aucun fichier sélectionné
+                </div>
+
+            </div>
+
+
+            <div class="upload-card">
+
+                <div class="upload-number">
+                    02
+                </div>
+
+                <h2>
+                    Fichier compteur
+                </h2>
+
+                <p>
+                    Fichier Excel contenant les relevés
+                    des compteurs horaires.
+                </p>
+
+                <label
+                    class="file-zone"
+                    for="fichier_compteur"
+                >
+
+                    <strong>
+                        Sélectionner le fichier
+                    </strong>
+
+                    <span>
+                        Format accepté : .xlsx
+                    </span>
+
+                </label>
+
+                <input
+                    id="fichier_compteur"
+                    name="fichier_compteur"
+                    type="file"
+                    accept=".xlsx"
+                    required
+                    class="file-input"
+                >
+
+                <div
+                    id="nom-compteur"
+                    class="selected-file"
+                >
+                    Aucun fichier sélectionné
+                </div>
+
+            </div>
+
+
+        </div>
+
+
+        <div class="process-card">
+
+            <h2>
+                Traitement SISE
+            </h2>
+
+            <div class="process-grid">
+
+                <div>
+                    <strong>1</strong>
+                    <span>Lecture</span>
+                </div>
+
+                <div>
+                    <strong>2</strong>
+                    <span>Contrôle</span>
+                </div>
+
+                <div>
+                    <strong>3</strong>
+                    <span>Calcul L/h</span>
+                </div>
+
+                <div>
+                    <strong>4</strong>
+                    <span>Historique</span>
+                </div>
+
+                <div>
+                    <strong>5</strong>
+                    <span>ML</span>
+                </div>
+
+                <div>
+                    <strong>6</strong>
+                    <span>Diagnostic</span>
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="form-actions">
+
+            <a
+                href="/"
+                class="button light"
+            >
+                Annuler
+            </a>
+
+            <button
+                type="submit"
+                class="button primary"
+            >
+                Lancer l'analyse
+            </button>
+
+        </div>
+
+
+    </form>
+
+
+</main>
+
+
+<script>
+
+    const carburantInput =
+        document.getElementById(
+            "fichier_carburant"
+        );
+
+    const compteurInput =
+        document.getElementById(
+            "fichier_compteur"
+        );
+
+
+    carburantInput.addEventListener(
+        "change",
+        function () {
+
+            const nom =
+                this.files.length > 0
+                    ? this.files[0].name
+                    : "Aucun fichier sélectionné";
+
+            document.getElementById(
+                "nom-carburant"
+            ).textContent = nom;
+
+        }
+    );
+
+
+    compteurInput.addEventListener(
+        "change",
+        function () {
+
+            const nom =
+                this.files.length > 0
+                    ? this.files[0].name
+                    : "Aucun fichier sélectionné";
+
+            document.getElementById(
+                "nom-compteur"
+            ).textContent = nom;
+
+        }
+    );
+
+</script>
+
+
+</body>
+
+</html>

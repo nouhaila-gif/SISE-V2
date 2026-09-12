@@ -1,0 +1,1204 @@
+<!DOCTYPE html>
+
+<html lang="fr">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        SISE - {{ data.engin }}
+    </title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/style.css') }}"
+    >
+
+    <script
+        src="https://cdn.jsdelivr.net/npm/chart.js"
+    ></script>
+
+
+    <style>
+
+        .why-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .why-card {
+            background: #f6f9fb;
+            border: 1px solid #dde8ee;
+            border-radius: 9px;
+            padding: 16px;
+        }
+
+        .why-card-title {
+            color: #123d5a;
+            font-size: 11px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .why-card p {
+            margin: 0;
+            color: #60798a;
+            font-size: 10px;
+            line-height: 1.7;
+        }
+
+        .diagnostic-summary {
+            margin-top: 16px;
+            padding: 16px;
+            background: #edf5f9;
+            border-left: 4px solid #1678b9;
+            border-radius: 7px;
+        }
+
+        .diagnostic-summary strong {
+            display: block;
+            color: #123d5a;
+            font-size: 11px;
+            margin-bottom: 6px;
+        }
+
+        .diagnostic-summary p {
+            margin: 0;
+            color: #536f82;
+            font-size: 10px;
+            line-height: 1.7;
+        }
+
+        .interpretation-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 5px;
+            background: #eef5f8;
+            color: #305b72;
+            font-size: 9px;
+            font-weight: 700;
+            margin-left: 6px;
+        }
+
+        .model-detail {
+            margin-top: 7px;
+            color: #7b909e;
+            font-size: 9px;
+            line-height: 1.5;
+        }
+
+        .new-month-note {
+            margin-top: 10px;
+            padding: 9px 12px;
+            border-radius: 7px;
+            background: #edf6fb;
+            color: #496f86;
+            font-size: 9px;
+            line-height: 1.6;
+        }
+
+        .diagnostic-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 5px;
+        }
+
+        .diagnostic-table td {
+            padding: 10px 2px;
+            border-bottom: 1px solid #edf2f5;
+            font-size: 10px;
+        }
+
+        .diagnostic-table td:first-child {
+            color: #7c909f;
+        }
+
+        .diagnostic-table td:last-child {
+            text-align: right;
+            color: #173d59;
+            font-weight: 700;
+        }
+
+        .why-main {
+            margin-top: 16px;
+        }
+
+        .why-main > p {
+            font-size: 11px;
+            line-height: 1.8;
+            color: #567185;
+        }
+
+        .interpretation-scale {
+            margin-top: 15px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+
+        .scale-box {
+            background: #f7fafc;
+            border: 1px solid #e0e9ee;
+            border-radius: 7px;
+            padding: 10px;
+        }
+
+        .scale-box span {
+            display: block;
+            color: #8799a6;
+            font-size: 8px;
+            margin-bottom: 4px;
+        }
+
+        .scale-box strong {
+            color: #173d59;
+            font-size: 10px;
+        }
+
+        @media(max-width: 850px) {
+
+            .why-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .interpretation-scale {
+                grid-template-columns: 1fr;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<header class="top-header">
+
+    <div class="header-left">
+
+        <img
+            src="{{ url_for('static', filename='images/logo_marsa.png') }}"
+            class="logo"
+            alt="Marsa Maroc"
+        >
+
+        <div>
+
+            <div class="brand-title">
+                SISE
+            </div>
+
+            <div class="brand-subtitle">
+                Système Intelligent de Surveillance Énergétique
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <nav class="top-nav">
+
+        <a
+            href="/"
+            class="nav-link"
+        >
+            Tableau de bord
+        </a>
+
+        <a
+            href="/donnees"
+            class="nav-link"
+        >
+            Données
+        </a>
+
+    </nav>
+
+</header>
+
+
+<main class="page-container">
+
+
+    <!-- ==================================================
+         HERO
+    =================================================== -->
+
+    <section
+        class="detail-hero detail-{{ data.couleur|lower }}"
+    >
+
+        <div>
+
+            <a
+                href="/"
+                class="back-link"
+            >
+                Retour au tableau de bord
+            </a>
+
+            <h1>
+                {{ data.engin }}
+            </h1>
+
+            <p>
+                Période analysée :
+                <strong>
+                    {{ data.periode }}
+                </strong>
+            </p>
+
+        </div>
+
+
+        <div class="detail-state">
+
+            <span>
+                {{ data.etat }}
+            </span>
+
+        </div>
+
+    </section>
+
+
+    <!-- ==================================================
+         KPI
+    =================================================== -->
+
+    <section class="detail-kpis">
+
+
+        <div class="metric-card">
+
+            <span>
+                Consommation actuelle
+            </span>
+
+            <strong>
+
+                {% if data.lh_reel is not none %}
+
+                    {{ data.lh_reel }} L/h
+
+                {% else %}
+
+                    Non disponible
+
+                {% endif %}
+
+            </strong>
+
+        </div>
+
+
+        <div class="metric-card">
+
+            <span>
+                Référence historique
+            </span>
+
+            <strong>
+
+                {% if data.reference_historique is not none %}
+
+                    {{ data.reference_historique }} L/h
+
+                {% else %}
+
+                    Non disponible
+
+                {% endif %}
+
+            </strong>
+
+        </div>
+
+
+        <div class="metric-card">
+
+            <span>
+                Heures d'activité
+            </span>
+
+            <strong>
+
+                {% if data.heures is not none %}
+
+                    {{ data.heures }} h
+
+                {% else %}
+
+                    Non disponible
+
+                {% endif %}
+
+            </strong>
+
+        </div>
+
+
+        <div class="metric-card">
+
+            <span>
+                Carburant consommé
+            </span>
+
+            <strong>
+
+                {% if data.litres is not none %}
+
+                    {{ data.litres }} L
+
+                {% else %}
+
+                    Non disponible
+
+                {% endif %}
+
+            </strong>
+
+        </div>
+
+
+    </section>
+
+
+    <!-- ==================================================
+         GRAPHIQUE + DIAGNOSTIC
+    =================================================== -->
+
+    <section class="detail-main-grid">
+
+
+        <div class="panel">
+
+            <div class="panel-header">
+
+                <div>
+
+                    <h2>
+                        Évolution de la consommation
+                    </h2>
+
+                    <p>
+                        Historique L/h et nouveau mois importé.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="detail-chart-wrapper">
+
+                <canvas
+                    id="detailChart"
+                ></canvas>
+
+            </div>
+
+
+            {% if data.nouveau_mois %}
+
+            <div class="new-month-note">
+
+                Le dernier point du graphique correspond à
+                <strong>{{ data.periode }}</strong>.
+
+                Il est utilisé pour le diagnostic actuel mais
+                n'est pas ajouté à l'historique permanent.
+
+            </div>
+
+            {% endif %}
+
+        </div>
+
+
+        <!-- ==================================================
+             DIAGNOSTIC
+        =================================================== -->
+
+        <div class="panel diagnostic-card">
+
+            <div class="panel-header">
+
+                <div>
+
+                    <h2>
+                        Diagnostic SISE
+                    </h2>
+
+                    <p>
+                        Résultat de l'analyse du mois.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="diagnostic-type">
+
+                <span>
+                    Type d'anomalie
+                </span>
+
+                <strong>
+                    {{ data.type_anomalie }}
+                </strong>
+
+            </div>
+
+
+            <table class="diagnostic-table">
+
+                <tr>
+
+                    <td>
+                        Écart L/h
+                    </td>
+
+                    <td>
+
+                        {% if data.ecart_lh_pct is not none %}
+
+                            {{ data.ecart_lh_pct }} %
+
+                        {% else %}
+
+                            Non disponible
+
+                        {% endif %}
+
+                    </td>
+
+                </tr>
+
+
+                <tr>
+
+                    <td>
+                        Robust Z
+                    </td>
+
+                    <td>
+
+                        {% if data.robust_z is not none %}
+
+                            {{ data.robust_z }}
+
+                        {% else %}
+
+                            Non disponible
+
+                        {% endif %}
+
+                    </td>
+
+                </tr>
+
+
+                <tr>
+
+                    <td>
+                        Ratio activité
+                    </td>
+
+                    <td>
+
+                        {% if data.ratio_activite is not none %}
+
+                            {{ data.ratio_activite }}
+
+                        {% else %}
+
+                            Non disponible
+
+                        {% endif %}
+
+                    </td>
+
+                </tr>
+
+
+                <tr>
+
+                    <td>
+                        Convergence ML
+                    </td>
+
+                    <td>
+                        {{ data.vote_total }}/3
+                    </td>
+
+                </tr>
+
+
+                <tr>
+
+                    <td>
+                        Fiabilité
+                    </td>
+
+                    <td>
+                        {{ data.niveau_fiabilite }}
+                    </td>
+
+                </tr>
+
+            </table>
+
+
+            <div class="interpretation-scale">
+
+
+                <div class="scale-box">
+
+                    <span>
+                        Consommation
+                    </span>
+
+                    <strong>
+
+                        {% if data.robust_z is none %}
+
+                            Non évaluée
+
+                        {% elif data.robust_z >= 3 %}
+
+                            Forte hausse
+
+                        {% elif data.robust_z <= -3 %}
+
+                            Forte baisse
+
+                        {% elif data.robust_z >= 2 or data.robust_z <= -2 %}
+
+                            À surveiller
+
+                        {% else %}
+
+                            Variation modérée
+
+                        {% endif %}
+
+                    </strong>
+
+                </div>
+
+
+                <div class="scale-box">
+
+                    <span>
+                        Activité
+                    </span>
+
+                    <strong>
+
+                        {% if data.ratio_activite is none %}
+
+                            Non évaluée
+
+                        {% elif data.ratio_activite >= 1.5 %}
+
+                            Élevée
+
+                        {% elif data.ratio_activite <= 0.75 %}
+
+                            Faible
+
+                        {% else %}
+
+                            Habituelle
+
+                        {% endif %}
+
+                    </strong>
+
+                </div>
+
+
+                <div class="scale-box">
+
+                    <span>
+                        Signal ML
+                    </span>
+
+                    <strong>
+
+                        {% if data.vote_total == 3 %}
+
+                            Très fort
+
+                        {% elif data.vote_total == 2 %}
+
+                            Confirmé
+
+                        {% elif data.vote_total == 1 %}
+
+                            Faible
+
+                        {% else %}
+
+                            Aucun
+
+                        {% endif %}
+
+                    </strong>
+
+                </div>
+
+
+            </div>
+
+        </div>
+
+
+    </section>
+
+
+    <!-- ==================================================
+         MODELES
+    =================================================== -->
+
+    {% if data.nouveau_mois %}
+
+    <section class="model-grid">
+
+
+        <div class="model-card">
+
+            <span>
+                Isolation Forest
+            </span>
+
+            <strong>
+
+                {% if data.vote_IF == 1 %}
+
+                    Atypique
+
+                {% else %}
+
+                    Non détectée
+
+                {% endif %}
+
+            </strong>
+
+            <div class="model-detail">
+
+                Détecte les observations globalement
+                isolées dans l'espace des variables.
+
+            </div>
+
+        </div>
+
+
+        <div class="model-card">
+
+            <span>
+                LOF
+            </span>
+
+            <strong>
+
+                {% if data.vote_LOF == 1 %}
+
+                    Atypique
+
+                {% else %}
+
+                    Non détectée
+
+                {% endif %}
+
+            </strong>
+
+            <div class="model-detail">
+
+                Compare l'observation à la densité
+                de ses voisines les plus proches.
+
+            </div>
+
+        </div>
+
+
+        <div class="model-card">
+
+            <span>
+                One-Class SVM
+            </span>
+
+            <strong>
+
+                {% if data.vote_OCSVM == 1 %}
+
+                    Atypique
+
+                {% else %}
+
+                    Non détectée
+
+                {% endif %}
+
+            </strong>
+
+            <div class="model-detail">
+
+                Vérifie si l'observation reste dans
+                la région considérée comme habituelle.
+
+            </div>
+
+        </div>
+
+
+    </section>
+
+    {% endif %}
+
+
+    <!-- ==================================================
+         POURQUOI CE DIAGNOSTIC ?
+    =================================================== -->
+
+    <section class="panel why-main">
+
+        <div class="panel-header">
+
+            <div>
+
+                <h2>
+                    Pourquoi ce diagnostic ?
+                </h2>
+
+                <p>
+                    Décomposition des éléments ayant conduit
+                    à la décision du SISE.
+                </p>
+
+            </div>
+
+        </div>
+
+
+        <div class="why-grid">
+
+
+            <!-- CONSOMMATION -->
+
+            <div class="why-card">
+
+                <div class="why-card-title">
+                    1. Analyse de la consommation
+                </div>
+
+
+                <p>
+
+                    La consommation du mois est de
+
+                    <strong>
+                        {{ data.lh_reel }} L/h
+                    </strong>.
+
+                    {% if data.reference_historique is not none %}
+
+                        La référence historique propre à cette
+                        chargeuse est de
+
+                        <strong>
+                            {{ data.reference_historique }} L/h
+                        </strong>.
+
+                    {% endif %}
+
+
+                    {% if data.ecart_lh_pct is not none %}
+
+                        Cela représente un écart de
+
+                        <strong>
+                            {{ data.ecart_lh_pct }} %
+                        </strong>.
+
+                    {% endif %}
+
+                </p>
+
+            </div>
+
+
+            <!-- ROBUST Z -->
+
+            <div class="why-card">
+
+                <div class="why-card-title">
+                    2. Analyse statistique Robust Z
+                </div>
+
+
+                <p>
+
+                    {% if data.robust_z is none %}
+
+                        Le Robust Z ne peut pas être calculé
+                        de manière fiable pour cette observation.
+
+                    {% elif data.robust_z >= 3 %}
+
+                        Le Robust Z vaut
+
+                        <strong>
+                            {{ data.robust_z }}
+                        </strong>.
+
+                        La consommation est fortement supérieure
+                        au comportement historique habituel de
+                        cette chargeuse.
+
+                    {% elif data.robust_z <= -3 %}
+
+                        Le Robust Z vaut
+
+                        <strong>
+                            {{ data.robust_z }}
+                        </strong>.
+
+                        La consommation est fortement inférieure
+                        au comportement historique habituel.
+
+                    {% elif data.robust_z >= 2 or data.robust_z <= -2 %}
+
+                        Le Robust Z vaut
+
+                        <strong>
+                            {{ data.robust_z }}
+                        </strong>.
+
+                        L'écart est notable. Il n'est pas encore
+                        classé comme anomalie forte, mais il
+                        mérite une surveillance.
+
+                    {% else %}
+
+                        Le Robust Z vaut
+
+                        <strong>
+                            {{ data.robust_z }}
+                        </strong>.
+
+                        Cette valeur reste entre -2 et +2.
+                        L'écart observé reste donc compatible
+                        avec la variabilité historique de
+                        cette chargeuse.
+
+                    {% endif %}
+
+                </p>
+
+            </div>
+
+
+            <!-- ACTIVITE -->
+
+            <div class="why-card">
+
+                <div class="why-card-title">
+                    3. Analyse du niveau d'activité
+                </div>
+
+
+                <p>
+
+                    La chargeuse a fonctionné
+
+                    <strong>
+                        {{ data.heures }} heures
+                    </strong>
+
+                    pendant la période analysée.
+
+
+                    {% if data.ratio_activite is not none %}
+
+                        Le ratio entre l'activité actuelle et
+                        l'activité historique est de
+
+                        <strong>
+                            {{ data.ratio_activite }}
+                        </strong>.
+
+
+                        {% if data.ratio_activite >= 2 %}
+
+                            L'activité est très supérieure
+                            à son niveau historique habituel.
+
+                        {% elif data.ratio_activite >= 1.5 %}
+
+                            L'activité est sensiblement supérieure
+                            au niveau historique.
+
+                        {% elif data.ratio_activite <= 0.5 %}
+
+                            L'activité est très inférieure
+                            au niveau historique habituel.
+
+                        {% elif data.ratio_activite <= 0.75 %}
+
+                            L'activité est inférieure
+                            à l'habitude.
+
+                        {% else %}
+
+                            L'activité reste proche
+                            de son niveau historique habituel.
+
+                        {% endif %}
+
+                    {% endif %}
+
+                </p>
+
+            </div>
+
+
+            <!-- ML -->
+
+            <div class="why-card">
+
+                <div class="why-card-title">
+                    4. Analyse par les modèles ML
+                </div>
+
+
+                <p>
+
+                    La convergence des trois modèles est de
+
+                    <strong>
+                        {{ data.vote_total }}/3
+                    </strong>.
+
+
+                    {% if data.vote_total == 0 %}
+
+                        Aucun modèle ne considère cette
+                        observation comme atypique.
+                        Il n'existe donc pas de confirmation
+                        multivariée de l'anomalie.
+
+                    {% elif data.vote_total == 1 %}
+
+                        Un seul modèle détecte une anomalie.
+                        Le signal ML existe mais reste faible.
+
+                    {% elif data.vote_total == 2 %}
+
+                        Deux modèles sur trois détectent
+                        une configuration inhabituelle.
+                        Le signal multivarié est donc confirmé.
+
+                    {% else %}
+
+                        Les trois modèles détectent une
+                        configuration atypique.
+                        La convergence ML est particulièrement
+                        forte.
+
+                    {% endif %}
+
+                </p>
+
+            </div>
+
+
+            <!-- FIABILITE -->
+
+            <div class="why-card">
+
+                <div class="why-card-title">
+                    5. Fiabilité de l'observation
+                </div>
+
+
+                <p>
+
+                    Niveau de fiabilité :
+
+                    <strong>
+                        {{ data.niveau_fiabilite }}
+                    </strong>.
+
+                    {% if data.raison_fiabilite %}
+
+                        {{ data.raison_fiabilite }}
+
+                    {% endif %}
+
+                </p>
+
+            </div>
+
+
+            <!-- DECISION -->
+
+            <div class="why-card">
+
+                <div class="why-card-title">
+                    6. Décision SISE
+                </div>
+
+
+                <p>
+
+                    Le système classe finalement le mois comme :
+
+                    <strong>
+                        {{ data.etat }}
+                    </strong>.
+
+                    Le type retenu est :
+
+                    <strong>
+                        {{ data.type_anomalie }}
+                    </strong>.
+
+                </p>
+
+            </div>
+
+
+        </div>
+
+
+        <!-- CONCLUSION -->
+
+        <div class="diagnostic-summary">
+
+            <strong>
+                Conclusion
+            </strong>
+
+            <p>
+                {{ data.explication }}
+            </p>
+
+        </div>
+
+
+    </section>
+
+
+    <!-- ==================================================
+         ACTION + QR
+    =================================================== -->
+
+    <section
+        class="analysis-grid"
+        style="margin-top:16px;"
+    >
+
+
+        <div class="panel action-card">
+
+            <h2>
+                Action recommandée
+            </h2>
+
+            <p>
+                {{ data.action }}
+            </p>
+
+        </div>
+
+
+        <div class="panel">
+
+            <h2>
+                Lecture du résultat
+            </h2>
+
+            <p>
+
+                Une anomalie détectée par le SISE correspond
+                à une situation statistiquement ou
+                multivariée inhabituelle.
+
+                Elle ne constitue pas à elle seule
+                un diagnostic de panne mécanique.
+
+            </p>
+
+        </div>
+
+
+        <div class="panel qr-card">
+
+            <h2>
+                Accès à la fiche
+            </h2>
+
+            <img
+                src="/qr/{{ data.engin }}.png"
+                alt="QR code {{ data.engin }}"
+                class="qr-image"
+            >
+
+            <p>
+
+                Scanner ce QR code pour accéder
+                directement à la fiche de
+
+                <strong>
+                    {{ data.engin }}
+                </strong>.
+
+            </p>
+
+        </div>
+
+
+    </section>
+
+
+</main>
+
+
+<script>
+
+    const historyData =
+        {{ history | tojson }};
+
+    const currentEngine =
+        "{{ data.engin }}";
+
+</script>
+
+
+<script
+    src="{{ url_for('static', filename='js/dashboard.js') }}"
+></script>
+
+
+</body>
+
+</html>

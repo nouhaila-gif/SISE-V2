@@ -1,0 +1,29 @@
+# Fichiers Python temporaires
+__pycache__/
+*.pyc
+*.pyo
+
+# Environnement Python
+.venv/
+venv/
+
+# Fichiers temporaires générés par SISE
+temp_sise/
+uploads/
+
+# Données historiques et ML privées
+dataset_historique_final.xlsx
+dataset_pret_ml.xlsx
+resultats_regles_SISE_detaillees.xlsx
+
+# Fichiers importés par l'utilisateur
+CARBURANT*.xlsx
+COMPTEUR*.xlsx
+POINT DE MESURE*.xlsx
+
+# Exports
+*.csv
+
+# Fichiers système
+.DS_Store
+Thumbs.db
