@@ -1750,3 +1750,99 @@ input {
     }
 
 }
+/* =========================================================
+   NOUVEAU STYLE KPI SOBRE
+========================================================= */
+
+.kpi-row {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 16px;
+    margin: 22px 0 28px;
+}
+
+.kpi-box {
+    background: #ffffff;
+    border: 1px solid #d9e2e8;
+    border-radius: 10px;
+    padding: 22px 24px;
+    min-height: 165px;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+
+    box-shadow: 0 2px 8px rgba(18, 49, 71, 0.04);
+
+    border-top: 1px solid #d9e2e8 !important;
+}
+
+.kpi-text {
+    display: flex;
+    flex-direction: column;
+}
+
+.kpi-text span {
+    color: #173b58 !important;
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 18px;
+}
+
+.kpi-text strong {
+    color: #0e3552 !important;
+    font-size: 42px;
+    line-height: 1;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+.kpi-text small {
+    color: #73899a !important;
+    font-size: 13px;
+    font-weight: 400;
+}
+
+.progress-track {
+    width: 100%;
+    height: 6px;
+    background: #e8edf1;
+    border-radius: 20px;
+    overflow: hidden;
+    margin-top: 22px;
+}
+
+.progress-value {
+    height: 100%;
+    background: #58758a !important;
+    border-radius: 20px;
+}
+
+/* Supprime les anciennes couleurs des cartes */
+.kpi-blue,
+.kpi-red,
+.kpi-yellow,
+.kpi-green,
+.kpi-gray {
+    border-top-color: #d9e2e8 !important;
+    background: #ffffff !important;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+    .kpi-row {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 800px) {
+    .kpi-row {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 520px) {
+    .kpi-row {
+        grid-template-columns: 1fr;
+    }
+}
